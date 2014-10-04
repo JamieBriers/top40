@@ -5,7 +5,7 @@
 // Chris Pomfret - Sept 2014
 // or /usr/local/bin/php
 $profileURL = "http://tf.maxters.net/pbay/user/oldskoolscouse";
-//$profileURL = "http://feeds.bbci.co.uk/news/england/rss.xml";
+
 $data;	// Global for returning feed data
 $filename = "top40_data";
 $lastDownloadedTime;	// Time the last torrent we downloaded was released
