@@ -4,7 +4,8 @@
 // Set cron job for '* 20 * * 0'	(Every Sunday at 8)
 // Chris Pomfret - Sept 2014
 // or /usr/local/bin/php
-$profileURL = "http://pirateproxy.bz/user/oldskoolscouse/0/3/0";
+$profileURL = "http://tf.maxters.net/pbay/user/oldskoolscouse";
+//$profileURL = "http://feeds.bbci.co.uk/news/england/rss.xml";
 $data;	// Global for returning feed data
 $filename = "top40_data";
 $lastDownloadedTime;	// Time the last torrent we downloaded was released
@@ -14,10 +15,7 @@ loadData();					// Load $lastDownloadedTime from $filename
 
 $xml = new SimpleXMLElement($data);
 
-$xml.toString();
-exit();
-
-$publishTime = strtotime($xml->html->bodychannel->item[0]->pubDate);		// Publish date of latest torrent - Convert real format to UNIX time, much easier to work with
+$publishTime = strtotime($xml->channel->item[0]->pubDate);		// Publish date of latest torrent - Convert real format to UNIX time, much easier to work with
 
 // Now we work out it out if we need to download
 if ($publishTime > $lastDownloadedTime){
@@ -30,8 +28,6 @@ if ($publishTime > $lastDownloadedTime){
 	$fh = fopen($filename, 'w') or die("can't open file");
 	fwrite($fh, $lastDownloadedTime);
 	fclose($fh);
-
-	
 	
 	// Now we need to send the found URI to rTorrent.
 	echo shell_exec("transmission-remote -a ".$xml->channel->item[0]->torrent->magnetURI);
@@ -57,10 +53,15 @@ function loadData(){
 // Used to grab feed data
 function getFeed($feedURI){
 	global $data;
-	$ch = curl_init();
-	curl_setopt($ch, CURLOPT_URL, $feedURI);
-	curl_setopt($ch, CURLOPT_HEADER, 0);
-	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+	$ch = curl_init($feedURI);
+	curl_setopt_array($ch, Array(
+	CURLOPT_URL            => $feedURI,
+	CURLOPT_USERAGENT      => 'spider',
+	CURLOPT_TIMEOUT        => 120,
+	CURLOPT_CONNECTTIMEOUT => 30,
+	CURLOPT_RETURNTRANSFER => TRUE,
+	CURLOPT_ENCODING       => 'UTF-8'
+	));
 	$data = curl_exec($ch);
 	curl_close($ch);
 }
